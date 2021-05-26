@@ -68,6 +68,45 @@ class Trainer(object):
         return loss.detach().cpu(), self._scheduler.get_last_lr()[0]
 
 
+def evaluate(trainer: Trainer,
+             train_loader: DataLoader,
+             test_loader: DataLoader):
+    # get train embeddings
+    feature_list, label_list = [], []
+    loop = tqdm(train_loader, leave=False, dynamic_ncols=True, desc='Testing')
+    for doc in loop:
+        feature = trainer.predict(doc['feature']).numpy()
+        label = doc['label'].numpy()
+        feature_list.extend(feature)
+        label_list.extend(label)
+    train_feature = np.array(feature_list)
+    train_label = np.array(label_list)
+
+    # get test embeddings
+    feature_list, label_list = [], []
+    loop = tqdm(test_loader, leave=False, dynamic_ncols=True, desc='Testing')
+    for doc in loop:
+        feature = trainer.predict(doc['feature']).numpy()
+        label = doc['label'].numpy()
+        feature_list.extend(feature)
+        label_list.extend(label)
+    test_feature = np.array(feature_list)
+    test_label = np.array(label_list)
+
+    # normalize the features
+    mean = np.mean(train_feature, 0, keepdims=True)
+    sigma = np.sqrt(np.var(train_feature, 0, keepdims=True))
+    train_feature = (train_feature - mean) / (sigma + 1e-10)
+    test_feature = (test_feature - mean) / (sigma + 1e-10)
+
+    # perform the classification through LR
+    classifier = LogisticRegression(max_iter=10000)
+    classifier.fit(train_feature, train_label)
+    pred_label = classifier.predict(test_feature)
+    acc = accuracy_score(test_label, pred_label)
+    return acc
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--gpu', default='0')
@@ -144,40 +183,8 @@ def main():
 
         # evaluate for every n epochs
         if (epoch + 1) % 5 == 0:
-            # get train embeddings
             model.eval()
-            feature_list, label_list = [], []
-            loop = tqdm(train_loader, leave=False, dynamic_ncols=True, desc='Testing')
-            for doc in loop:
-                feature = trainer.predict(doc['feature']).numpy()
-                label = doc['label'].numpy()
-                feature_list.extend(feature)
-                label_list.extend(label)
-            train_feature = np.array(feature_list)
-            train_label = np.array(label_list)
-
-            # get test embeddings
-            feature_list, label_list = [], []
-            loop = tqdm(test_loader, leave=False, dynamic_ncols=True, desc='Testing')
-            for doc in loop:
-                feature = trainer.predict(doc['feature']).numpy()
-                label = doc['label'].numpy()
-                feature_list.extend(feature)
-                label_list.extend(label)
-            test_feature = np.array(feature_list)
-            test_label = np.array(label_list)
-
-            # normalize the features
-            mean = np.mean(train_feature, 0, keepdims=True)
-            sigma = np.sqrt(np.var(train_feature, 0, keepdims=True))
-            train_feature = (train_feature - mean) / (sigma + 1e-10)
-            test_feature = (test_feature - mean) / (sigma + 1e-10)
-
-            # perform the classification through LR
-            classifier = LogisticRegression(max_iter=10000)
-            classifier.fit(train_feature, train_label)
-            pred_label = classifier.predict(test_feature)
-            acc = accuracy_score(test_label, pred_label)
+            acc = evaluate(trainer, train_loader, test_loader)
             tqdm.write(f'[{epoch + 1}/{args.num_epochs}] L={loss_g:.06f} Acc={acc:.02%}')
         else:
             tqdm.write(f'[{epoch + 1}/{args.num_epochs}] L={loss_g:.06f}')
