@@ -45,9 +45,47 @@ Sample 4999
     "label": 5
 ```
 
+## Start Training
+
+```
+usage: train.py [-h] [--gpu GPU] --data-path DATA_PATH
+                [--batch-size BATCH_SIZE] [--num-epochs NUM_EPOCHS]
+                [--max-lr MAX_LR] [--weight-decay WEIGHT_DECAY]
+                [--optimizer OPTIMIZER] [--base-model BASE_MODEL]
+                [--emb-size EMB_SIZE] [--proj-size PROJ_SIZE]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --gpu GPU             Which GPU to use.
+  --data-path DATA_PATH
+                        Path of the directory that contains the data files.
+  --batch-size BATCH_SIZE
+                        Batch size.
+  --num-epochs NUM_EPOCHS
+                        The number of epochs to train.
+  --max-lr MAX_LR       The maximum value of learning rate.
+  --weight-decay WEIGHT_DECAY
+                        The weight decay value.
+  --optimizer OPTIMIZER
+                        Name of the optimizer to use.
+  --base-model BASE_MODEL
+                        The base model.
+  --emb-size EMB_SIZE   The embedding dimension.
+  --proj-size PROJ_SIZE
+                        The projection head dimension.
+```
+
+For example, the following command is to train the model using ResNet-18 with STL10 dataset on GPU: 0.
+
+```bash
+python3 train.py --data-path /path/of/data/stl10/ --base-model resnet18 --gpu 0
+```
+
 ## Results on STL10
 
 | Base Net  | Project Head Size | Feature Size | Optimizer |   Learning Rate   | Weight Decay | Epochs | Top 1 Accuracy |
 | :-------: | :---------------: | :----------: | :-------: | :---------------: | :----------: | :----: | :------------: |
 | ResNet-18 |        128        |     512      |   AdamW   | max: 1e-3, min: 0 |     0.3      |  100   |     78.94%     |
+| ResNet-18 |        128        |     512      |   AdamW   | max: 1e-3, min: 0 |     0.3      |  200   |                |
+| ResNet-34 |        128        |     512      |   AdamW   | max: 1e-3, min: 0 |     0.3      |  100   |     79.34%     |
 

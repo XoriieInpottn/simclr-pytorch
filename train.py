@@ -109,16 +109,16 @@ def evaluate(trainer: Trainer,
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--gpu', default='0')
-    parser.add_argument('--data-path', required=True)
-    parser.add_argument('--batch-size', type=int, default=256)
-    parser.add_argument('--num-epochs', type=int, default=100)
-    parser.add_argument('--max-lr', type=float, default=1e-3)
-    parser.add_argument('--weight-decay', type=float, default=0.3)
-    parser.add_argument('--optimizer', default='AdamW')
-    parser.add_argument('--base-model', default='resnet18')
-    parser.add_argument('--emb-size', type=int, default=512)
-    parser.add_argument('--proj-size', type=int, default=128)
+    parser.add_argument('--gpu', default='0', help='Which GPU to use.')
+    parser.add_argument('--data-path', required=True, help='Path of the directory that contains the data files.')
+    parser.add_argument('--batch-size', type=int, default=256, help='Batch size.')
+    parser.add_argument('--num-epochs', type=int, default=100, help='The number of epochs to train.')
+    parser.add_argument('--max-lr', type=float, default=1e-3, help='The maximum value of learning rate.')
+    parser.add_argument('--weight-decay', type=float, default=0.3, help='The weight decay value.')
+    parser.add_argument('--optimizer', default='AdamW', help='Name of the optimizer to use.')
+    parser.add_argument('--base-model', default='resnet18', help='The base model.')
+    parser.add_argument('--emb-size', type=int, default=512, help='The embedding dimension.')
+    parser.add_argument('--proj-size', type=int, default=128, help='The projection head dimension.')
     args = parser.parse_args()
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 
