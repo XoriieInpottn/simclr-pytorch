@@ -1,5 +1,7 @@
 # SimCLR Implementation (PyTorch)
 
+This is a pytorch implementation of "SimCLR - A Simple Framework for Contrastive Learning of Visual Representations".
+
 ## Prepare Dataset
 
 ### Data Format
