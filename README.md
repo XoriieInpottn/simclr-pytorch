@@ -85,7 +85,7 @@ python3 train.py --data-path /path/of/data/stl10/ --base-model resnet18 --gpu 0
 
 | Base Net  | Project Head Size | Feature Size | Optimizer |   Learning Rate   | Weight Decay | Epochs | Top 1 Accuracy |
 | :-------: | :---------------: | :----------: | :-------: | :---------------: | :----------: | :----: | :------------: |
+|  VGG-16   |        128        |     512      |   AdamW   | max: 1e-3, min: 0 |     0.3      |  100   |     68.56%     |
 | ResNet-18 |        128        |     512      |   AdamW   | max: 1e-3, min: 0 |     0.3      |  100   |     78.94%     |
-| ResNet-18 |        128        |     512      |   AdamW   | max: 1e-3, min: 0 |     0.3      |  200   |                |
 | ResNet-34 |        128        |     512      |   AdamW   | max: 1e-3, min: 0 |     0.3      |  100   |     79.34%     |
 
