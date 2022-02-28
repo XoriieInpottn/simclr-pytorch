@@ -15,7 +15,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 from torch import nn
 from torch import optim
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, ConcatDataset
 from torchvision import models
 from tqdm import tqdm
 
@@ -66,6 +66,43 @@ class Trainer(object):
         self._optimizer.zero_grad()
         self._scheduler.step()
         return loss.detach().cpu(), self._scheduler.get_last_lr()[0]
+
+
+def create_data_loader(data_path, image_size, batch_size):
+    train_path = os.path.join(data_path, 'train.ds')
+    test_path = os.path.join(data_path, 'test.ds')
+    unlabeled_path = os.path.join(data_path, 'unlabeled.ds')
+    unlabeled_dataset = dataset.UnsupervisedDataset(train_path, image_size)
+    if os.path.exists(unlabeled_path):
+        unlabeled_dataset = ConcatDataset([
+            unlabeled_dataset,
+            dataset.UnsupervisedDataset(unlabeled_path, image_size)
+        ])
+    unlabeled_loader = DataLoader(
+        unlabeled_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=10,
+        pin_memory=True,
+        drop_last=True,
+        persistent_workers=True
+    )
+    train_loader = DataLoader(
+        dataset.SupervisedDataset(train_path, image_size),
+        batch_size=batch_size,
+        shuffle=False,
+        pin_memory=True,
+        num_workers=5
+    )
+    test_loader = DataLoader(
+        dataset.SupervisedDataset(test_path, image_size),
+        batch_size=batch_size,
+        shuffle=False,
+        pin_memory=True,
+        num_workers=5
+    )
+    print('Data loaded.')
+    return unlabeled_loader, train_loader, test_loader
 
 
 def evaluate(trainer: Trainer,
@@ -122,39 +159,14 @@ def main():
     args = parser.parse_args()
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 
+    import cv2 as cv
+    cv.setNumThreads(0)
+
     model_class = getattr(models, args.base_model)
     model = model_class(pretrained=False, num_classes=args.emb_size)
     print('Model created.')
 
-    train_path = os.path.join(args.data_path, 'train.ds')
-    test_path = os.path.join(args.data_path, 'test.ds')
-    unlabeled_path = os.path.join(args.data_path, 'unlabeled.ds')
-    unlabeled_loader = DataLoader(
-        dataset.create_unsupervised_dataset(
-            [train_path, unlabeled_path] if os.path.exists(unlabeled_path)
-            else [train_path]
-        ),
-        batch_size=args.batch_size,
-        shuffle=True,
-        num_workers=20,
-        pin_memory=True,
-        drop_last=True
-    )
-    train_loader = DataLoader(
-        dataset.create_supervised_dataset([train_path]),
-        batch_size=args.batch_size,
-        shuffle=False,
-        pin_memory=True,
-        num_workers=5
-    )
-    test_loader = DataLoader(
-        dataset.create_supervised_dataset([test_path]),
-        batch_size=args.batch_size,
-        shuffle=False,
-        pin_memory=True,
-        num_workers=5
-    )
-    print('Data loaded.')
+    unlabeled_loader, train_loader, test_loader = create_data_loader(args.data_path, 96, args.batch_size)
 
     trainer = Trainer(
         model=model,
