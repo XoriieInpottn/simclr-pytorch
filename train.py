@@ -82,7 +82,7 @@ def create_data_loader(data_path, image_size, batch_size):
         unlabeled_dataset,
         batch_size=batch_size,
         shuffle=True,
-        num_workers=10,
+        num_workers=20,
         pin_memory=True,
         drop_last=True,
         persistent_workers=True
