@@ -110,7 +110,7 @@ def evaluate(trainer: Trainer,
              test_loader: DataLoader):
     # get train embeddings
     feature_list, label_list = [], []
-    loop = tqdm(train_loader, leave=False, dynamic_ncols=True, desc='Testing')
+    loop = tqdm(train_loader, leave=False, desc='Testing', ncols=96)
     for doc in loop:
         feature = trainer.predict(doc['feature']).numpy()
         label = doc['label'].numpy()
@@ -121,7 +121,7 @@ def evaluate(trainer: Trainer,
 
     # get test embeddings
     feature_list, label_list = [], []
-    loop = tqdm(test_loader, leave=False, dynamic_ncols=True, desc='Testing')
+    loop = tqdm(test_loader, leave=False, desc='Testing', ncols=96)
     for doc in loop:
         feature = trainer.predict(doc['feature']).numpy()
         label = doc['label'].numpy()
@@ -185,7 +185,7 @@ def main():
     for epoch in range(args.num_epochs):
         # train one epoch
         model.train()
-        loop = tqdm(unlabeled_loader, leave=False, dynamic_ncols=True)
+        loop = tqdm(unlabeled_loader, leave=False, ncols=96)
         for doc in loop:
             x1, x2 = doc['feature']
             loss, lr = trainer.train(x1, x2)
