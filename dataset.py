@@ -16,10 +16,10 @@ class ColorJitter(iaa.Sequential):
 
     def __init__(
             self,
-            hue_shift: Union[float, Tuple[float], None] = 0.05,
-            saturation_factor: Union[float, Tuple[float], None] = 0.2,
-            brightness_factor: Union[float, Tuple[float], None] = 0.2,
-            contrast_factor: Union[float, Tuple[float], None] = 0.2
+            hue_shift: Union[float, Tuple[float, float], None] = 0.05,
+            saturation_factor: Union[float, Tuple[float, float], None] = 0.2,
+            brightness_factor: Union[float, Tuple[float, float], None] = 0.2,
+            contrast_factor: Union[float, Tuple[float, float], None] = 0.2
     ) -> None:
         """Randomly change the hue, saturation, brightness and contrast of an image.
 
